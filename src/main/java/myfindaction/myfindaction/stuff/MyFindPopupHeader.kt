@@ -1,5 +1,6 @@
 package myfindaction.myfindaction.stuff
 
+import com.intellij.execution.target.fixHighlightingOfUiDslComponents
 import com.intellij.find.FindBundle
 import com.intellij.find.FindUsagesCollector
 import com.intellij.find.impl.FindPopupPanel
@@ -18,6 +19,7 @@ import com.intellij.util.ui.EmptyIcon
 import com.intellij.util.ui.JBDimension
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
+import java.awt.Component
 import java.awt.Dimension
 import javax.swing.Box
 import javax.swing.JButton
@@ -42,27 +44,35 @@ internal class MyFindPopupHeader(project: Project, filterContextButton: ActionBu
                         .bold()
                         .gap(RightGap.SMALL)
                         .component
+                titleLabel.hide()
                 infoLabel = label("")
                         .gap(RightGap.SMALL)
                         .component
+                infoLabel.hide()
                 UIUtil.applyStyle(UIUtil.ComponentStyle.SMALL, infoLabel)
-
                 loadingIcon = icon(EmptyIcon.ICON_16)
                         .resizableColumn()
                         .component
-
+                loadingIcon.hide()
                 cbFileFilter = cell(createCheckBox(project))
                         .gap(RightGap.SMALL)
                         .component
+                cbFileFilter.hide()
                 fileMaskField = cell(createFileFilter()).component
-
+                fileMaskField.hide()
                 cell(filterContextButton)
                         .gap(RightGap.SMALL)
+                filterContextButton.hide()
                 if (!ExperimentalUI.isNewUI()) {
                     cell(createSeparator())
                             .gap(RightGap.SMALL)
                 }
                 actionButton(pinAction)
+                titleLabel.hide()
+                infoLabel.hide()
+                loadingIcon.hide()
+                cbFileFilter.hide()
+                fileMaskField.hide()
             }
         }
     }
@@ -72,6 +82,11 @@ internal class MyFindPopupHeader(project: Project, filterContextButton: ActionBu
         checkBox.addActionListener {
             FindUsagesCollector.CHECK_BOX_TOGGLED.log(project, FindUsagesCollector.FIND_IN_PATH, FindPopupPanel.ToggleOptionName.FileFilter, checkBox.isSelected)
         }
+        titleLabel.hide()
+        infoLabel.hide()
+        loadingIcon.hide()
+        cbFileFilter.hide()
+        fileMaskField.hide()
         return checkBox
     }
 
@@ -104,6 +119,11 @@ internal class MyFindPopupHeader(project: Project, filterContextButton: ActionBu
                 val insets = insets
                 width += insets.left + insets.right
                 size.width = MathUtil.clamp(width, JBUIScale.scale(80), JBUIScale.scale(500))
+                titleLabel.hide()
+                infoLabel.hide()
+                loadingIcon.hide()
+                cbFileFilter.hide()
+                fileMaskField.hide()
                 return size
             }
         }
@@ -118,6 +138,11 @@ internal class MyFindPopupHeader(project: Project, filterContextButton: ActionBu
         val result = Box.createRigidArea(JBDimension(1, 24)) as JComponent
         result.isOpaque = true
         result.background = JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground()
-        return result
+        titleLabel.hide()
+        infoLabel.hide()
+        loadingIcon.hide()
+        cbFileFilter.hide()
+        fileMaskField.hide()
+        return result;
     }
 }
