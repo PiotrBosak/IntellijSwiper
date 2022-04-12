@@ -28,6 +28,7 @@
 
     </extensions>
     <actions>
-        <action id="MyFindAction" class="myfindaction.myfindaction.MyFindAction" text="MyFindAction"/>
+        <action id="SwiperFile" class="myfindaction.myfindaction.MyFindAction" text="MyFindAction"/>
+        <action id="SwiperSearchInFile" class="myfindaction.myfindaction.SwiperSearchInFile" text="SwiperSearchInFile"/>
     </actions>
 </idea-plugin>
