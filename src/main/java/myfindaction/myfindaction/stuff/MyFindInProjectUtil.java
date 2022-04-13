@@ -50,6 +50,7 @@ import com.intellij.usages.UsageView;
 import com.intellij.usages.UsageViewPresentation;
 import com.intellij.util.PatternUtil;
 import com.intellij.util.Processor;
+import myfindaction.myfindaction.StringConverter;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

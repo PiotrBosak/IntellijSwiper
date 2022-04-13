@@ -78,6 +78,7 @@ import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.ui.*;
+import myfindaction.myfindaction.StringConverter;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -994,6 +995,12 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                     findModel.setCustomScope(true);
                     findModel.setCustomScope(fileScope);
                 }
+                StringConverter converter = new StringConverter();
+                String s = findModel.isProjectScope() ?
+                        converter.convertPermutations(findModel.getStringToFind()) :
+                        converter.convert(findModel.getStringToFind());
+                findModel.setStringToFind(s);
+                findModel.setRegularExpressions(true);
                 projectExecutor.findUsages(myProject, myResultsPreviewSearchProgress, processPresentation, findModel, filesToScanInitially, usage -> {
                     if(isCancelled()) {
                         onStop(hash);

@@ -1,5 +1,6 @@
 package myfindaction.myfindaction;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -9,19 +10,42 @@ import java.util.stream.Collectors;
 
 //fix it
 public class StringConverter {
-    List<String> list = new ArrayList();
-    private static final List<String> specials = List.of(new String[]{"\\", "^", "$", ".", "|", "?", "*", "+", "(", ")", "[", "]", "{", "}"});
+
+    List<String> list = new ArrayList<String>();
+    private static final List<String> specials = List.of("\\", "^", "$", ".", "|", "?", "*", "+", "(", ")", "[", "]", "{", "}");
 
     public String convert(String s) {
+        s = this.replaceSpecialCharacters(s);
+         return s.replaceAll("\\s+", ".*");
+    }
+    public String convertPermutations(String s){
         s = this.replaceSpecialCharacters(s);
         String[] words = s.split("\\s+");
         this.printAllRecursive(words.length, words, ".*");
         return makeString(this.list, "|");
     }
 
+    private String replaceSpecialCharacters(String s) {
+        var separate = new ArrayList<String>();
+        for(int i = 0; i < s.length(); i++){
+            separate.add(s.substring(i,i+1));
+        }
+        return separate.stream()
+                .map(str -> {
+                    for (int j = 0; j < specials.size(); j++) {
+                        str = str.equals(specials.get(j)) ? "\\" + str : str;
+                    }
+                    return str;
+                })
+                .collect(Collectors.joining());
+
+    }
+
+
+
     private void printAllRecursive(int n, String[] elements, String delimiter) {
         if (n == 1) {
-            this.list.add(makeString((List) Arrays.stream(elements).collect(Collectors.toList()), delimiter));
+            this.list.add(makeString(Arrays.stream(elements).collect(Collectors.toList()), delimiter));
         } else {
             for (int i = 0; i < n - 1; ++i) {
                 this.printAllRecursive(n - 1, elements, delimiter);
@@ -36,16 +60,6 @@ public class StringConverter {
         }
 
     }
-
-    private String replaceSpecialCharacters(String s) {
-        String result = s;
-        String sp;
-        List<String> parts;
-
-
-        return result;
-    }
-
     private void swap(String[] input, int a, int b) {
         String tmp = input[a];
         input[a] = input[b];
@@ -64,15 +78,14 @@ public class StringConverter {
             })).toString();
         }
     }
-
     public static <T, S> S foldLeft(List<T> list, S start, BiFunction<S, T, S> f) {
-        for(int i = 0; i < list.size(); i++) {
-            start = f.apply(start,list.get(i));
-        }
+        for (T t : list)
+            start = f.apply(start, t);
+
         return start;
     }
-
     public static <S> List<S> tail(List<S> list) {
         return list.subList(1, list.size());
     }
+
 }
