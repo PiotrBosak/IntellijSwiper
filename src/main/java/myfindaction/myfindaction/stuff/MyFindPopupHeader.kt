@@ -1,6 +1,5 @@
 package myfindaction.myfindaction.stuff
 
-import com.intellij.execution.target.fixHighlightingOfUiDslComponents
 import com.intellij.find.FindBundle
 import com.intellij.find.FindUsagesCollector
 import com.intellij.find.impl.FindPopupPanel
@@ -19,7 +18,6 @@ import com.intellij.util.ui.EmptyIcon
 import com.intellij.util.ui.JBDimension
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
-import java.awt.Component
 import java.awt.Dimension
 import javax.swing.Box
 import javax.swing.JButton

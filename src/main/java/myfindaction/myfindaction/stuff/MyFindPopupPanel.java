@@ -63,9 +63,7 @@ import com.intellij.ui.*;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.components.*;
 import com.intellij.ui.dsl.builder.SpacingConfiguration;
-import com.intellij.ui.dsl.gridLayout.builders.RowBuilder;
 import com.intellij.ui.hover.TableHoverListener;
-import com.intellij.ui.mac.touchbar.Touchbar;
 import com.intellij.ui.popup.PopupState;
 import com.intellij.ui.render.RenderingUtil;
 import com.intellij.ui.scale.JBUIScale;
@@ -699,23 +697,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
 
         myIsPinned.set(UISettings.getInstance().getPinFindInPath());
 
-        JBInsets textFieldBorderInsets = JBUI.CurrentTheme.ComplexPopup.textFieldBorderInsets();
-        if (ExperimentalUI.isNewUI()) {
-            Color background = JBUI.CurrentTheme.Popup.BACKGROUND;
-            Insets headerInsets = JBUI.CurrentTheme.ComplexPopup.headerInsets();
-            int verticalGap = SpacingConfiguration.createIntelliJSpacingConfiguration().getVerticalComponentGap();
-            headerInsets.top -= verticalGap;
-            headerInsets.bottom -= verticalGap;
-            setBackground(background);
-            mySearchTextArea.setOpaque(false);
-            mySearchTextArea.setBorder(PopupUtil.createComplexPopupTextFieldBorder());
-            myReplaceTextArea.setOpaque(false);
-            myReplaceTextArea.setBorder(PopupUtil.createComplexPopupTextFieldBorder());
-            myUsagePreviewTitle.setBorder(JBUI.Borders.empty(12, 8, 5, 0));
-            myResultsPreviewTable.setBackground(background);
-            previewPanel.setBackground(background);
-            myPreviewSplitter.setBorder(JBUI.Borders.empty(0, textFieldBorderInsets.getUnscaled().left, 0, textFieldBorderInsets.getUnscaled().right));
-        } else {
             mySearchTextArea.setBorder(JBUI.Borders.compound(
                     JBUI.Borders.customLine(JBUI.CurrentTheme.BigPopup.searchFieldBorderColor(), 1, 0, 1, 0),
                     JBUI.Borders.empty(1, 0, 2, 0)));
@@ -723,12 +704,10 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                     JBUI.Borders.customLine(JBUI.CurrentTheme.BigPopup.searchFieldBorderColor(), 0, 0, 1, 0),
                     JBUI.Borders.empty(1, 0, 2, 0)));
             myUsagePreviewTitle.setBorder(JBUI.Borders.empty(3, 8, 4, 8));
-        }
 
         add(mySearchTextArea, "pushx, growx, wrap");
         add(myReplaceTextArea, "pushx, growx, wrap");
-        add(myPreviewSplitter, "pushx, growx, growy, pushy, wrap" +
-                (ExperimentalUI.isNewUI() ? ", gap " + textFieldBorderInsets.left + " " + textFieldBorderInsets.right + " 0 0" : ""));
+        add(myPreviewSplitter, "pushx, growx, growy, pushy, wrap");
 
         List<Component> focusOrder = new ArrayList<>();
         focusOrder.add(mySearchComponent);
@@ -1224,9 +1203,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
             return (text + (full ? " " + KeymapUtil.getFirstKeyboardShortcutText(((AnAction)option).getShortcutSet()) : "")).trim();
         }
         if (option instanceof JToggleButton) {
-            CustomShortcutSet shortcutSet = KeymapUtil.getShortcutsForMnemonicCode(((JToggleButton)option).getMnemonic());
-            return (((JToggleButton)option).getText().replace(":", "") +
-                    (shortcutSet != null && full ? " " + KeymapUtil.getFirstKeyboardShortcutText(shortcutSet) : "")).trim();
         }
         if (option instanceof FindModel) return FindBundle.message("message.nothingFound.context.filter");
         return null;

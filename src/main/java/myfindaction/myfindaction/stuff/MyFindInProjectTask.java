@@ -270,16 +270,6 @@ public class MyFindInProjectTask {
                 totalSize = myTotalFilesSize.addAndGet(fileLength);
             }
 
-            if (totalSize > FILES_SIZE_LIMIT) {
-                TooManyUsagesStatus tooManyUsagesStatus = TooManyUsagesStatus.getFrom(myProgress);
-                if (tooManyUsagesStatus.switchTooManyUsagesStatus()) {
-                    UsageViewManagerImpl.showTooManyUsagesWarningLater(myProject, tooManyUsagesStatus, myProgress, null, () -> FindBundle.message("find.excessive.total.size.prompt",
-                            UsageViewManagerImpl.presentableSize(myTotalFilesSize.longValue()),
-                            ApplicationNamesInfo.getInstance().getProductName()), null);
-                }
-                tooManyUsagesStatus.pauseProcessingIfTooManyUsages();
-                myProgress.checkCanceled();
-            }
             return true;
         };
         return processor;
@@ -309,7 +299,6 @@ public class MyFindInProjectTask {
         } else if (myModule != null) {
             WorkspaceEntityStorage storage = WorkspaceModel.getInstance(myProject).getEntityStorage().getCurrent();
             ModuleEntity moduleEntity = Objects.requireNonNull(storage.resolve(new ModuleId(myModule.getName())));
-            deque.addAll(IndexableEntityProviderMethods.INSTANCE.createIterators(moduleEntity, storage, myProject));
         } else {
             deque.addAll(((FileBasedIndexEx) FileBasedIndex.getInstance()).getIndexableFilesProviders(myProject));
         }
@@ -385,7 +374,6 @@ public class MyFindInProjectTask {
     }
 
     private boolean canRelyOnSearchers() {
-        if (!TrigramTextSearchService.useIndexingSearchExtensions()) return false;
         return ContainerUtil.find(mySearchers, s -> s.isReliable()) != null;
     }
 
@@ -397,7 +385,6 @@ public class MyFindInProjectTask {
                 resultFiles.add(file);
             }
         }
-        if (!TrigramTextSearchService.useIndexingSearchExtensions()) return resultFiles;
         for (FindInProjectSearchEngine.FindInProjectSearcher searcher : mySearchers) {
             Collection<VirtualFile> virtualFiles = searcher.searchForOccurrences();
             for (VirtualFile file : virtualFiles) {

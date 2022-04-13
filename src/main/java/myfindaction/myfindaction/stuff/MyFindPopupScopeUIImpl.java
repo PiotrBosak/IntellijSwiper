@@ -4,10 +4,7 @@ package myfindaction.myfindaction.stuff;
 import com.intellij.find.FindBundle;
 import com.intellij.find.FindModel;
 import com.intellij.find.FindSettings;
-import com.intellij.find.impl.FindPopupDirectoryChooser;
-import com.intellij.find.impl.FindPopupPanel;
 import com.intellij.find.impl.FindPopupScopeUI;
-import com.intellij.find.impl.FindUIHelper;
 import com.intellij.ide.util.scopeChooser.ScopeChooserCombo;
 import com.intellij.ide.util.scopeChooser.ScopeDescriptor;
 import com.intellij.openapi.module.Module;
@@ -24,7 +21,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.SearchScope;
 import com.intellij.ui.SimpleListCellRenderer;
-import com.intellij.ui.dsl.gridLayout.builders.RowBuilder;
+import com.intellij.ui.layout.RowBuilder;
 import com.intellij.ui.scale.JBUIScale;
 import com.intellij.util.Functions;
 import com.intellij.util.ObjectUtils;
@@ -204,7 +201,6 @@ class MyFindPopupScopeUIImpl implements FindPopupScopeUI {
 
     private static JComponent shrink(JComponent toShrink) {
         JPanel wrapper = new JPanel();
-        new RowBuilder(wrapper).add(toShrink);
         return wrapper;
     }
 

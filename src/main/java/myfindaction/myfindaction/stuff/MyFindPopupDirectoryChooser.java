@@ -27,7 +27,6 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.ui.DocumentAdapter;
-import com.intellij.ui.dsl.gridLayout.builders.RowBuilder;
 import com.intellij.util.ui.JBInsets;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -74,7 +73,6 @@ public class MyFindPopupDirectoryChooser extends JPanel {
 
         FixedSizeButton mySelectDirectoryButton = new FixedSizeButton(myDirectoryComboBox);
         TextFieldWithBrowseButton.MyDoClickAction.addTo(mySelectDirectoryButton, myDirectoryComboBox);
-        mySelectDirectoryButton.setMargin(JBInsets.emptyInsets());
 
         mySelectDirectoryButton.addActionListener(__ -> {
             FileChooserDescriptor descriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
@@ -107,10 +105,6 @@ public class MyFindPopupDirectoryChooser extends JPanel {
         int mnemonicModifiers = SystemInfo.isMac ? InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK : InputEvent.ALT_DOWN_MASK;
         recursiveDirectoryAction.registerCustomShortcutSet(new CustomShortcutSet(KeyStroke.getKeyStroke(KeyEvent.VK_Y, mnemonicModifiers)), myFindPopupPanel);
 
-        RowBuilder builder = new RowBuilder(this);
-        builder
-                .addResizable(myDirectoryComboBox)
-                .add(mySelectDirectoryButton, FindPopupPanel.createToolbar(recursiveDirectoryAction).getComponent());
     }
 
     @SuppressWarnings("WeakerAccess")
