@@ -118,6 +118,8 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
     public static FindPopupScopeUI.ScopeType globalScopeType;
     public static GlobalSearchScope fileScope;
     private static final KeyStroke ENTER = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+    private static final KeyStroke PREVIOUS = KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.ALT_DOWN_MASK);
+    private static final KeyStroke NEXT = KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.ALT_DOWN_MASK);
     private static final KeyStroke ENTER_WITH_MODIFIERS = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, SystemInfo.isMac
             ? InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK);
     private static final KeyStroke REPLACE_ALL = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK | InputEvent.ALT_DOWN_MASK);
@@ -164,6 +166,9 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
     private AnAction myCaseSensitiveAction;
     private AnAction myWholeWordsAction;
     private AnAction myRegexAction;
+
+    private AnAction previousEntryAction;
+    private AnAction nextEntryAction;
     private boolean mySuggestRegexHintForEmptyResults = true;
     private JBSplitter myPreviewSplitter;
 
@@ -438,10 +443,36 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         return myCanClose;
     }
 
+    private int counter = 0;
+    private void showPreviousEntry(){
+        var history = FindInProjectSettings.getInstance(myProject).getRecentFindStrings();
+        if(counter < history.length -1){
+            counter++;
+        }
+        if(counter <= history.length -1){
+            mySearchComponent.setText(history[history.length - 1 - counter]);
+        }
+
+    }
+    private void showNextEntry(){
+        var history = FindInProjectSettings.getInstance(myProject).getRecentFindStrings();
+        if(counter > 0){
+            counter--;
+        }
+        if(counter <= history.length -1){
+            mySearchComponent.setText(history[history.length - 1 - counter]);
+        }
+
+    }
     private void initComponents() {
         AnAction myShowFilterPopupAction = new MyShowFilterPopupAction();
         myShowFilterPopupAction.registerCustomShortcutSet(myShowFilterPopupAction.getShortcutSet(), this);
 
+
+        previousEntryAction = DumbAwareAction.create(event -> showPreviousEntry());
+        nextEntryAction = DumbAwareAction.create(event -> showNextEntry());
+        previousEntryAction.registerCustomShortcutSet(new CustomShortcutSet(PREVIOUS), this);
+        nextEntryAction.registerCustomShortcutSet(new CustomShortcutSet(NEXT), this);
         myOKButton = new JButton(FindBundle.message("find.popup.find.button"));
         myOkActionListener = __ -> doOK(true);
         myOKButton.addActionListener(myOkActionListener);
