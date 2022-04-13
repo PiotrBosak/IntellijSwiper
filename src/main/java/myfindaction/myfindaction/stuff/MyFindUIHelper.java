@@ -125,7 +125,9 @@ public class MyFindUIHelper implements Disposable {
     }
 
     void updateFindSettings() {
-        ((MyFindManagerImpl)FindManager.getInstance(myProject)).changeGlobalSettings(myModel);
+        FindManagerImpl base = (FindManagerImpl)FindManager.getInstance(this.myProject);
+        var manager = new MyFindManagerImpl(base,this.myProject);
+        manager.changeGlobalSettings(this.myModel);
         FindSettings findSettings = FindSettings.getInstance();
         findSettings.setCaseSensitive(myModel.isCaseSensitive());
         if (myModel.isReplaceState()) {
