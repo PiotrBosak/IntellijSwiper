@@ -114,6 +114,8 @@ import static com.intellij.ui.SimpleTextAttributes.STYLE_PLAIN;
 import static com.intellij.util.FontUtil.spaceAndThinSpace;
 
 public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindUI {
+    public static FindPopupScopeUI.ScopeType globalScopeType;
+    public static GlobalSearchScope fileScope;
     private static final KeyStroke ENTER = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
     private static final KeyStroke ENTER_WITH_MODIFIERS = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, SystemInfo.isMac
             ? InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK);
@@ -516,7 +518,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         List<Component> replaceExtraButtons = myReplaceTextArea.setExtraActions(
                 preserveCaseAction);
 
-        mySelectedScope = new FindPopupScopeUI.ScopeType("Project", FindBundle.messagePointer("find.popup.scope.project"), EmptyIcon.ICON_0);
+        mySelectedScope = globalScopeType;
 
         TableHoverListener.DEFAULT.removeFrom(myResultsPreviewTable);
         new DoubleClickListener() {
@@ -647,7 +649,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         };
         scrollPane.setBorder(JBUI.Borders.empty());
         myPreviewSplitter.setFirstComponent(scrollPane);
-        JPanel bottomPanel = new JPanel(new MigLayout("flowx, ins 4 4 4 4, fillx, hidemode 3, gap 0"));
         myOKHintLabel = new JBLabel("");
         myOKHintLabel.setEnabled(false);
         myNavigationHintLabel = new JBLabel("");
@@ -656,17 +657,12 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         Insets insets = myOKButton.getInsets();
         String btnGapLeft = "gapleft " + Math.max(0, JBUIScale.scale(12) - insets.left - insets.right);
 
-        bottomPanel.add(myNavigationHintLabel, btnGapLeft);
-        bottomPanel.add(Box.createHorizontalGlue(), "growx, pushx");
-        bottomPanel.add(myOKHintLabel);
-        bottomPanel.add(myOKButton, btnGapLeft);
 
         myCodePreviewComponent = myUsagePreviewPanel.createComponent();
         JPanel previewPanel = new JPanel(new BorderLayout());
         previewPanel.add(myUsagePreviewTitle, BorderLayout.NORTH);
         previewPanel.add(myCodePreviewComponent, BorderLayout.CENTER);
         myPreviewSplitter.setSecondComponent(previewPanel);
-        JPanel scopesPanel = new JPanel();
         setLayout(new MigLayout("flowx, ins 0, gap 0, fillx, hidemode 3"));
 
         myIsPinned.set(UISettings.getInstance().getPinFindInPath());
@@ -683,11 +679,9 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
             mySearchTextArea.setBorder(PopupUtil.createComplexPopupTextFieldBorder());
             myReplaceTextArea.setOpaque(false);
             myReplaceTextArea.setBorder(PopupUtil.createComplexPopupTextFieldBorder());
-            scopesPanel.setOpaque(false);
             myUsagePreviewTitle.setBorder(JBUI.Borders.empty(12, 8, 5, 0));
             myResultsPreviewTable.setBackground(background);
             previewPanel.setBackground(background);
-            scopesPanel.setBorder(JBUI.Borders.empty(PopupUtil.createComplexPopupTextFieldInsets(4, 4)));
             myPreviewSplitter.setBorder(JBUI.Borders.empty(0, textFieldBorderInsets.getUnscaled().left, 0, textFieldBorderInsets.getUnscaled().right));
         } else {
             mySearchTextArea.setBorder(JBUI.Borders.compound(
@@ -696,23 +690,19 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
             myReplaceTextArea.setBorder(JBUI.Borders.compound(
                     JBUI.Borders.customLine(JBUI.CurrentTheme.BigPopup.searchFieldBorderColor(), 0, 0, 1, 0),
                     JBUI.Borders.empty(1, 0, 2, 0)));
-            scopesPanel.setBorder(JBUI.Borders.empty(3, 5));
             myUsagePreviewTitle.setBorder(JBUI.Borders.empty(3, 8, 4, 8));
         }
 
         add(mySearchTextArea, "pushx, growx, wrap");
         add(myReplaceTextArea, "pushx, growx, wrap");
-        add(scopesPanel, "pushx, growx, ax left, wrap");
         add(myPreviewSplitter, "pushx, growx, growy, pushy, wrap" +
                 (ExperimentalUI.isNewUI() ? ", gap " + textFieldBorderInsets.left + " " + textFieldBorderInsets.right + " 0 0" : ""));
-        add(bottomPanel, "pushx, growx, dock south");
 
         List<Component> focusOrder = new ArrayList<>();
         focusOrder.add(mySearchComponent);
         focusOrder.add(myReplaceComponent);
         focusOrder.addAll(searchExtraButtons);
         focusOrder.addAll(replaceExtraButtons);
-        ContainerUtil.addAll(focusOrder, focusableComponents(bottomPanel));
         setFocusCycleRoot(true);
         setFocusTraversalPolicy(new ListFocusTraversalPolicy(focusOrder));
 
@@ -720,7 +710,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
             List<JButton> principalButtons = new ArrayList<>();
             principalButtons.add(myOKButton);
 
-            Touchbar.setButtonActions(bottomPanel, null, principalButtons, myOKButton, new DefaultActionGroup(myCaseSensitiveAction, myWholeWordsAction, myRegexAction));
+//            Touchbar.setButtonActions(bottomPanel, null, principalButtons, myOKButton, new DefaultActionGroup(myCaseSensitiveAction, myWholeWordsAction, myRegexAction));
         }
     }
 
@@ -860,7 +850,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
             myPreserveCaseState.set(myModel.isPreserveCase());
         }
 
-        mySelectedScope = new FindPopupScopeUI.ScopeType("Project", FindBundle.messagePointer("find.popup.scope.project"), EmptyIcon.ICON_0);
+        mySelectedScope = globalScopeType;
 
         boolean isThereFileFilter = myModel.getFileFilter() != null && !myModel.getFileFilter().isEmpty();
         FindSettings findSettings = FindSettings.getInstance();
@@ -987,7 +977,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         final Ref<Integer> resultsCount = Ref.create(0);
         final AtomicInteger resultsFilesCount = new AtomicInteger();
         FindInProjectUtil.setupViewPresentation(myUsageViewPresentation, findModel);
-
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(new Task.Backgroundable(myProject,
                 FindBundle.message("find.usages.progress.title")) {
             @Override
@@ -996,7 +985,15 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                         FindInProjectUtil.setupProcessPresentation(myProject, myUsageViewPresentation);
                 ThreadLocal<String> lastUsageFileRef = new ThreadLocal<>();
                 ThreadLocal<Reference<Usage>> recentUsageRef = new ThreadLocal<>();
-
+                if(fileScope == null){
+                    findModel.setCustomScope(false);
+                    findModel.setProjectScope(true);
+                }
+                else {
+                    findModel.setProjectScope(false);
+                    findModel.setCustomScope(true);
+                    findModel.setCustomScope(fileScope);
+                }
                 projectExecutor.findUsages(myProject, myResultsPreviewSearchProgress, processPresentation, findModel, filesToScanInitially, usage -> {
                     if(isCancelled()) {
                         onStop(hash);
@@ -1552,35 +1549,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         public void setSelected(@NotNull AnActionEvent e, boolean state) {
             if (state) {
                 mySelectedContextName = getTemplatePresentation().getText();
-                scheduleResultsUpdate();
-            }
-        }
-    }
-
-    private class MySelectScopeToggleAction extends DumbAwareToggleAction {
-        private final FindPopupScopeUI.ScopeType myScope;
-
-        MySelectScopeToggleAction(@NotNull FindPopupScopeUI.ScopeType scope) {
-            super(scope.textComputable.get(), null, scope.icon);
-            getTemplatePresentation().setHoveredIcon(scope.icon);
-            getTemplatePresentation().setDisabledIcon(scope.icon);
-            myScope = scope;
-        }
-
-        @Override
-        public boolean displayTextInToolbar() {
-            return true;
-        }
-
-        @Override
-        public boolean isSelected(@NotNull AnActionEvent e) {
-            return mySelectedScope == myScope;
-        }
-
-        @Override
-        public void setSelected(@NotNull AnActionEvent e, boolean state) {
-            if (state) {
-                mySelectedScope = myScope;
                 scheduleResultsUpdate();
             }
         }

@@ -279,7 +279,7 @@ public class MyFindInProjectUtil {
         CharSequence text = document.getCharsSequence();
         int textLength = document.getTextLength();
         int offset = offsetRef[0];
-
+//TODO really important
         Project project = psiFile.getProject();
 
         FindManager findManager = FindManager.getInstance(project);

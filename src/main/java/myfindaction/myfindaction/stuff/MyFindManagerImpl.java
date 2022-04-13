@@ -139,7 +139,8 @@ public class MyFindManagerImpl extends FindManager {
 
     @NotNull
     public FindResult findString(@NotNull CharSequence text, int offset, @NotNull FindModel model, @Nullable VirtualFile findContextFile) {
-        FindResult var10000 = this.manager.findString(text, offset, model, findContextFile);
+        FindResult var10000 =
+                this.manager.findString(text, offset, model, findContextFile);
         return var10000;
     }
 
