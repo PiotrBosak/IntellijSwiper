@@ -42,8 +42,8 @@ public class MyFindUIHelper implements Disposable {
             component = panel;
             myUI = panel;
 
-            registerAction("ReplaceInPath", true, component, myUI);
-            registerAction("FindInPath", false, component, myUI);
+//            registerAction("ReplaceInPath", true, component, myUI);
+//            registerAction("FindInPath", false, component, myUI);
             Disposer.register(myUI.getDisposable(), this);
         }
         return myUI;

@@ -9,66 +9,43 @@ import com.intellij.usages.rules.PsiElementUsage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class MyUsageViewManager {
 
-    public static UsageViewManager getInstance (Project project) {
-        return project.getService(UsageViewManager.class);
+public class MyUsageViewManager extends UsageViewManager {
+    private final UsageViewManager manager;
+
+    public MyUsageViewManager(UsageViewManager manager) {
+        this.manager = manager;
     }
 
-    public abstract @NotNull UsageView createUsageView(UsageTarget @NotNull [] targets,
-                                                       Usage @NotNull [] usages,
-                                                       @NotNull UsageViewPresentation presentation,
-                                                       @Nullable Factory<? extends UsageSearcher> usageSearcherFactory);
-
-    public abstract @NotNull UsageView showUsages(UsageTarget @NotNull [] searchedFor,
-                                                  Usage @NotNull [] foundUsages,
-                                                  @NotNull UsageViewPresentation presentation,
-                                                  @Nullable Factory<? extends UsageSearcher> factory);
-
-    public abstract @NotNull UsageView showUsages(UsageTarget @NotNull [] searchedFor,
-                                                  Usage @NotNull [] foundUsages,
-                                                  @NotNull UsageViewPresentation presentation);
-
-    @Nullable ("returns null in case of no usages found or usage view not shown for one usage")
-    public abstract UsageView searchAndShowUsages(UsageTarget @NotNull [] searchFor,
-                                                  @NotNull Factory<? extends UsageSearcher> searcherFactory,
-                                                  boolean showPanelIfOnlyOneUsage,
-                                                  boolean showNotFoundMessage,
-                                                  @NotNull UsageViewPresentation presentation,
-                                                  @Nullable UsageViewManager.UsageViewStateListener listener);
-
-    public interface UsageViewStateListener {
-        void usageViewCreated(@NotNull UsageView usageView);
-        void findingUsagesFinished(@Nullable UsageView usageView);
+    @NotNull
+    public UsageView createUsageView(@NotNull UsageTarget[] targets, @NotNull Usage[] usages, @NotNull UsageViewPresentation presentation, @Nullable Factory<? extends UsageSearcher> usageSearcherFactory) {
+        UsageView var10000 = this.manager.createUsageView(targets, usages, presentation, usageSearcherFactory);
+        return var10000;
     }
 
-    public abstract void searchAndShowUsages(UsageTarget @NotNull [] searchFor,
-                                             @NotNull Factory<? extends UsageSearcher> searcherFactory,
-                                             @NotNull FindUsagesProcessPresentation processPresentation,
-                                             @NotNull UsageViewPresentation presentation,
-                                             @Nullable UsageViewManager.UsageViewStateListener listener);
+    @NotNull
+    public UsageView showUsages(@NotNull UsageTarget[] searchedFor, @NotNull Usage[] foundUsages, @NotNull UsageViewPresentation presentation, @Nullable Factory<? extends UsageSearcher> factory) {
+        UsageView var10000 = this.manager.showUsages(searchedFor, foundUsages, presentation, factory);
+        return var10000;
+    }
+
+    @NotNull
+    public UsageView showUsages(@NotNull UsageTarget[] searchedFor, @NotNull Usage[] foundUsages, @NotNull UsageViewPresentation presentation) {
+        UsageView var10000 = this.manager.showUsages(searchedFor, foundUsages, presentation);
+        return var10000;
+    }
+
+    @Nullable("returns null in case of no usages found or usage view not shown for one usage")
+    public UsageView searchAndShowUsages(@NotNull UsageTarget[] searchFor, @NotNull Factory<? extends UsageSearcher> searcherFactory, boolean showPanelIfOnlyOneUsage, boolean showNotFoundMessage, @NotNull UsageViewPresentation presentation, @Nullable UsageViewStateListener listener) {
+        return this.manager.searchAndShowUsages(searchFor, searcherFactory, showPanelIfOnlyOneUsage, showNotFoundMessage, presentation, listener);
+    }
+
+    public void searchAndShowUsages(@NotNull UsageTarget[] searchFor, @NotNull Factory<? extends UsageSearcher> searcherFactory, @NotNull FindUsagesProcessPresentation processPresentation, @NotNull UsageViewPresentation presentation, @Nullable UsageViewStateListener listener) {
+        this.manager.searchAndShowUsages(searchFor, searcherFactory, processPresentation, presentation, listener);
+    }
 
     @Nullable
-    public abstract UsageView getSelectedUsageView();
-
-    public static boolean isSelfUsage(@NotNull final Usage usage, final UsageTarget @NotNull [] searchForTarget) {
-        if (!(usage instanceof PsiElementUsage)) return false;
-        return ReadAction.compute(() -> {
-            final PsiElement element = ((PsiElementUsage)usage).getElement();
-            if (element == null) return false;
-
-            for (UsageTarget ut : searchForTarget) {
-                if (ut instanceof PsiElementUsageTarget) {
-                    if (isSelfUsage(element, ((PsiElementUsageTarget)ut).getElement())) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        });
-    }
-
-    private static boolean isSelfUsage(@NotNull PsiElement element, PsiElement psiElement) {
-        return element.getParent() == psiElement; // self usage might be configurable
+    public UsageView getSelectedUsageView() {
+        return this.manager.getSelectedUsageView();
     }
 }

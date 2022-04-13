@@ -4,6 +4,7 @@ package myfindaction.myfindaction;
 
 import com.intellij.find.FindModel;
 import com.intellij.find.actions.FindInPathAction;
+import com.intellij.find.findInProject.FindInProjectManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -18,7 +19,9 @@ public class SwiperSearchInFile extends AnAction {
         Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
         if(project == null)
             return;
-        MyFindInProjectManager findInProjectManager = new MyFindInProjectManager(project);
+
+        FindInProjectManager findInProjectManagerBase = FindInProjectManager.getInstance(project);
+        MyFindInProjectManager findInProjectManager = new MyFindInProjectManager(findInProjectManagerBase,project);
         FindModel findModel = new FindModel();
         findModel.setProjectScope(true);
         findModel.setReplaceState(false);
