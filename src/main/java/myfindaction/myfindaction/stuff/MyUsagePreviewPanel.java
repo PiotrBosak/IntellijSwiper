@@ -226,7 +226,7 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
                             continue;
                         }
                         InjectedLanguageManager.getInstance(project).injectedToHost(psiElement, infoRange2);
-                        RangeHighlighter highlighter = markupModel.addRangeHighlighter(EditorColors.FOLDED_TEXT_ATTRIBUTES,
+                        RangeHighlighter highlighter = markupModel.addRangeHighlighter(EditorColors.WRITE_SEARCH_RESULT_ATTRIBUTES,
                                 textRange2.getStartOffset(),
                                 textRange2.getEndOffset(),
                                 highlightLayer,
