@@ -120,6 +120,7 @@ import static com.intellij.util.FontUtil.spaceAndThinSpace;
 
 public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindUI {
     public static FindPopupScopeUI.ScopeType globalScopeType;
+    public static List<UsageInfo> myCoolUsages;
     public static GlobalSearchScope fileScope;
     private static final KeyStroke ENTER = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
     private static final KeyStroke PREVIOUS = KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.ALT_DOWN_MASK);
@@ -163,7 +164,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
     private JBTable myResultsPreviewTable;
     private DefaultTableModel myResultsPreviewTableModel;
     private SimpleColoredComponent myUsagePreviewTitle;
-    private UsagePreviewPanel myUsagePreviewPanel;
+    private MyUsagePreviewPanel myUsagePreviewPanel;
     private DialogWrapper myDialog;
     private int myLoadingHash;
     private final AtomicBoolean myNeedReset = new AtomicBoolean(true);
@@ -533,8 +534,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         myResultsPreviewTable.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         myResultsPreviewTable.setShowGrid(false);
         myResultsPreviewTable.setIntercellSpacing(JBUI.emptySize());
-        System.out.println(myResultsPreviewTable.getSelectionModel().getLeadSelectionIndex());
-        System.out.println(Arrays.toString(myResultsPreviewTable.getSelectionModel().getSelectedIndices()));
 
         mySearchComponent = new MyFindPopupPanel.JBTextAreaWithMixedAccessibleContext(myResultsPreviewTable.getAccessibleContext());
         mySearchComponent.setColumns(25);
@@ -621,7 +620,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         }
         myUsagePreviewTitle = new SimpleColoredComponent();
         myUsageViewPresentation = new UsageViewPresentation();
-        myUsagePreviewPanel = new UsagePreviewPanel(myProject, myUsageViewPresentation, true) {
+        myUsagePreviewPanel = new MyUsagePreviewPanel(myProject, myUsageViewPresentation, true) {
             @Override
             public Dimension getPreferredSize() {
                 return new Dimension(myResultsPreviewTable.getWidth(), Math.max(getHeight(), getLineHeight() * 15));
@@ -648,7 +647,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                 for (UsageInfo[] usageInfos : data) {
                     Collections.addAll(selectedUsages, usageInfos);
                 }
-                FindInProjectUtil.setupViewPresentation(myUsageViewPresentation, myHelper.getModel().clone());
+                MyFindInProjectUtil.setupViewPresentation(myUsageViewPresentation, myHelper.getModel().clone());
                 myUsagePreviewPanel.updateLayout(selectedUsages);
                 myUsagePreviewTitle.clear();
                 if (myUsagePreviewPanel.getCannotPreviewMessage(selectedUsages) == null && selectedFile != null) {
@@ -1074,7 +1073,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                         converter.convert(findModel.getStringToFind());
                 findModel.setStringToFind(s);
                 findModel.setRegularExpressions(true);
-                System.out.println("YYYYYYYYYYYYYYYYYYYYYYY");
                 projectExecutor.findUsages(myProject, myResultsPreviewSearchProgress, processPresentation, findModel, filesToScanInitially, usage -> {
                     if (isCancelled()) {
                         onStop(hash);
