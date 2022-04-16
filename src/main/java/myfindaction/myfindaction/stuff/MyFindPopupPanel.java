@@ -771,42 +771,19 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                     dataVector.clear();
                     fireTableDataChanged();
                 }
-                final Vector<UsageInfoAdapter> v = (Vector)convertToVector(rowData);
+                final Vector<UsageInfoAdapter> v = (Vector) convertToVector(rowData);
                 if (dataVector.isEmpty()) {
                     addRow(v);
                     myResultsPreviewTable.getSelectionModel().setSelectionInterval(0, 0);
                     firstResultPath = v.get(0).getPath();
-                }
-                else {
-                    int p = Collections.binarySearch((Vector<Vector<UsageInfoAdapter>>)((Vector)dataVector), v, COMPARATOR);
+                } else {
+                    int p = Collections.binarySearch((Vector<Vector<UsageInfoAdapter>>) ((Vector) dataVector), v, COMPARATOR);
                     if (p < 0) {
                         // only insert when not already present.
                         int row = -(p + 1);
                         insertRow(row, v);
                     }
                 }
-
-<<<<<<< HEAD
-                var line = FileEditorManager.getInstance(myProject).getSelectedTextEditor().getCaretModel().getLogicalPosition().line;
-                myResultsPreviewTable.getSelectionModel().setSelectionInterval(0, 0);
-                Vector<Vector<UsageInfoAdapter>> vec = (Vector<Vector<UsageInfoAdapter>>) ((Vector) dataVector);
-                var vecList = new ArrayList<>(vec);
-                var closestLine = ListUtils.zipWithIndex(vecList)
-                        .stream()
-                        .map(usage -> new Pair<>(usage.getFirst().get(0).getLine(), usage.getSecond()))
-                        .map(pair -> new Pair<>(pair.first - line, pair.second))
-                        .map(pair -> new Pair<>(Math.abs(pair.first), pair.second))
-                        .min(new Comparator<Pair<Integer, Integer>>() {
-                            @Override
-                            public int compare(Pair<Integer, Integer> o1, Pair<Integer, Integer> o2) {
-                                return o1.first - o2.first;
-                            }
-                        });
-                closestLine.ifPresent(l -> {
-                    System.out.println("WWWWWWWWWWWWWWWWWWWWWW");
-                    System.out.println(l);
-                    myResultsPreviewTable.getSelectionModel().setSelectionInterval(l.second, l.second);
-=======
 
                 if (fileScope != null) {
                     var line = FileEditorManager.getInstance(myProject).getSelectedTextEditor().getCaretModel().getLogicalPosition().line;
@@ -828,7 +805,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                         System.out.println("WWWWWWWWWWWWWWWWWWWWWW");
                         System.out.println(l);
                         myResultsPreviewTable.getSelectionModel().setSelectionInterval(l.second, l.second);
->>>>>>> 2dfa913 (fix project search)
 //                    myResultsPreviewTable.getSelectionModel().setLeadSelectionIndex(l);
                     });
                 }
