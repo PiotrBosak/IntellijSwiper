@@ -302,6 +302,18 @@ public class MyFindInProjectUtil {
                 if (!((LocalSearchScope)customScope).containsRange(psiFile, range)) continue;
             }
             UsageInfo info = new FindResultUsageInfo(findManager, psiFile, prevOffset, findModel, result);
+            if(MyFindPopupPanel.myCoolUsages == null){
+                MyFindPopupPanel.myCoolUsages = new ArrayList<>();
+                MyFindPopupPanel.myCoolUsages.add(info);
+            }
+            else {
+                MyFindPopupPanel.myCoolUsages.add(info);
+            }
+            //TODO W chuj istotne
+            //musisz tutaj zrobic jakas liste gdzie bedziesz to dodawac
+            //potem w tym highliht bedziesz highlightowac wszystko co tutaj jest
+            // poza tym glownym
+            //a potem wyczyscisz liste
             if (!consumer.process(info)) {
                 return false;
             }
@@ -355,6 +367,7 @@ public class MyFindInProjectUtil {
         setupViewPresentation(presentation, FindSettings.getInstance().isShowResultsInSeparateView(), findModel);
     }
 
+    //TODO to jest wazne, trzeba podpatrzec getRepalcementModel i to zaaplikowac tutaj
     public static void setupViewPresentation(UsageViewPresentation presentation, boolean toOpenInNewTab, @NotNull FindModel findModel) {
         String scope = getTitleForScope(findModel);
         final String stringToFind = findModel.getStringToFind();

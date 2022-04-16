@@ -115,6 +115,7 @@ import static com.intellij.util.FontUtil.spaceAndThinSpace;
 
 public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindUI {
     public static FindPopupScopeUI.ScopeType globalScopeType;
+    public static List<UsageInfo> myCoolUsages;
     public static GlobalSearchScope fileScope;
     private static final KeyStroke ENTER = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
     private static final KeyStroke PREVIOUS = KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.ALT_DOWN_MASK);
@@ -154,7 +155,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
     private JBTable myResultsPreviewTable;
     private DefaultTableModel myResultsPreviewTableModel;
     private SimpleColoredComponent myUsagePreviewTitle;
-    private UsagePreviewPanel myUsagePreviewPanel;
+    private MyUsagePreviewPanel myUsagePreviewPanel;
     private DialogWrapper myDialog;
     private int myLoadingHash;
     private final AtomicBoolean myNeedReset = new AtomicBoolean(true);
@@ -601,7 +602,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         }
         myUsagePreviewTitle = new SimpleColoredComponent();
         myUsageViewPresentation = new UsageViewPresentation();
-        myUsagePreviewPanel = new UsagePreviewPanel(myProject, myUsageViewPresentation, true) {
+        myUsagePreviewPanel = new MyUsagePreviewPanel(myProject, myUsageViewPresentation, true) {
             @Override
             public Dimension getPreferredSize() {
                 return new Dimension(myResultsPreviewTable.getWidth(), Math.max(getHeight(), getLineHeight() * 15));
@@ -628,7 +629,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                 for (UsageInfo[] usageInfos : data) {
                     Collections.addAll(selectedUsages, usageInfos);
                 }
-                FindInProjectUtil.setupViewPresentation(myUsageViewPresentation, myHelper.getModel().clone());
+                MyFindInProjectUtil.setupViewPresentation(myUsageViewPresentation, myHelper.getModel().clone());
                 myUsagePreviewPanel.updateLayout(selectedUsages);
                 myUsagePreviewTitle.clear();
                 if (myUsagePreviewPanel.getCannotPreviewMessage(selectedUsages) == null && selectedFile != null) {
@@ -689,6 +690,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         String btnGapLeft = "gapleft " + Math.max(0, JBUIScale.scale(12) - insets.left - insets.right);
 
 
+        //todo to jest to na pewno, trzeba ogarnac jak zaznacyc wszystkie linie
         myCodePreviewComponent = myUsagePreviewPanel.createComponent();
         JPanel previewPanel = new JPanel(new BorderLayout());
         previewPanel.add(myUsagePreviewTitle, BorderLayout.NORTH);

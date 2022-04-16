@@ -234,6 +234,7 @@ public class MyFindInProjectTask {
                 }
             }
             AtomicBoolean projectFileUsagesFound = new AtomicBoolean();
+            MyFindPopupPanel.myCoolUsages = null;
             if (!MyFindInProjectUtil.processUsagesInFile(psiFile, sourceVirtualFile, myFindModel, info -> {
                 if (skipProjectFile) {
                     projectFileUsagesFound.set(true);
