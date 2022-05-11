@@ -18,22 +18,27 @@ import org.jetbrains.annotations.NotNull;
 
 public class SwiperSearchInProject extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-        DataContext dataContext = anActionEvent.getDataContext();
-        Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
-        if(project == null)
-            return;
+        try {
+            DataContext dataContext = anActionEvent.getDataContext();
+            Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
+            if (project == null)
+                return;
 
 
-        FindInProjectManager findInProjectManagerBase = FindInProjectManager.getInstance(project);
-        MyFindInProjectManager findInProjectManager = new MyFindInProjectManager(findInProjectManagerBase,project);
+            FindInProjectManager findInProjectManagerBase = FindInProjectManager.getInstance(project);
+            MyFindInProjectManager findInProjectManager = new MyFindInProjectManager(findInProjectManagerBase, project);
 //        MyFindPopupPanel.globalScopeType = new FindPopupScopeUI.ScopeType("Project", FindBundle.messagePointer("find.popup.scope.project"), EmptyIcon.ICON_0);
 //        MyFindPopupPanel.fileScope = null;
-        FindModel findModel = new FindModel();
-        findModel.setProjectScope(true);
-        findModel.setReplaceState(false);
+            FindModel findModel = new FindModel();
+            findModel.setProjectScope(true);
+            findModel.setReplaceState(false);
 //        MyFindPopupPanel.currentFindModel = findModel;
-        MyFindPopupPanel.fileScope = null;
-        findInProjectManager.findInProject(dataContext, findModel);
+            MyFindPopupPanel.fileScope = null;
+            findInProjectManager.findInProject(dataContext, findModel);
+        }
+        catch (Exception ignore) {
+
+        }
     }
 
     public void update(AnActionEvent e) {

@@ -24,21 +24,26 @@ import org.jetbrains.annotations.NotNull;
 
 public class SwiperSearchInFile extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-        DataContext dataContext = anActionEvent.getDataContext();
-        Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
-        if(project == null)
-            return;
+        try {
+            DataContext dataContext = anActionEvent.getDataContext();
+            Project project = anActionEvent.getData(CommonDataKeys.PROJECT);
+            if (project == null)
+                return;
 
-        FindInProjectManager findInProjectManagerBase = FindInProjectManager.getInstance(project);
-        MyFindInProjectManager findInProjectManager = new MyFindInProjectManager(findInProjectManagerBase,project);
-        FindModel findModel = new FindModel();
-        findModel.setCustomScope(true);
-        Document currentDoc = FileEditorManager.getInstance(project).getSelectedTextEditor().getDocument();
-        VirtualFile currentFile = FileDocumentManager.getInstance().getFile(currentDoc);
-        var scope  = GlobalSearchScope.fileScope(project,currentFile);
-        findModel.setCustomScope(scope);
-        MyFindPopupPanel.fileScope = scope;
-        findInProjectManager.findInProject(dataContext, findModel);
+            FindInProjectManager findInProjectManagerBase = FindInProjectManager.getInstance(project);
+            MyFindInProjectManager findInProjectManager = new MyFindInProjectManager(findInProjectManagerBase, project);
+            FindModel findModel = new FindModel();
+            findModel.setCustomScope(true);
+            Document currentDoc = FileEditorManager.getInstance(project).getSelectedTextEditor().getDocument();
+            VirtualFile currentFile = FileDocumentManager.getInstance().getFile(currentDoc);
+            var scope = GlobalSearchScope.fileScope(project, currentFile);
+            findModel.setCustomScope(scope);
+            MyFindPopupPanel.fileScope = scope;
+            findInProjectManager.findInProject(dataContext, findModel);
+        }
+        catch (Exception ignore){
+
+        }
     }
 
     public void update(AnActionEvent e) {
