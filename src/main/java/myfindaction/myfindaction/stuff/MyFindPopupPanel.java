@@ -620,6 +620,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         }
         myUsagePreviewTitle = new SimpleColoredComponent();
         myUsageViewPresentation = new UsageViewPresentation();
+        //todo to jest chyba to co pokazuje kod
         myUsagePreviewPanel = new MyUsagePreviewPanel(myProject, myUsageViewPresentation, true) {
             @Override
             public Dimension getPreferredSize() {

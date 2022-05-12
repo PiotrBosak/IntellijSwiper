@@ -326,6 +326,8 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
         }
         Project project = psiFile.getProject();
 
+        //todo moze tutaj
+        //jak bedzie trzeba zmieniac caly edytor to chuj w to
         Editor editor = EditorFactory.getInstance().createEditor(document, project, psiFile.getVirtualFile(), !myIsEditor, EditorKind.PREVIEW);
 
         EditorSettings settings = editor.getSettings();
