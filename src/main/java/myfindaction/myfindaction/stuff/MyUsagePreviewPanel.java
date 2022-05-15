@@ -226,7 +226,6 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
                             || infoRange2.getStartOffset() > elementRange.getLength()
                             || infoRange2.getEndOffset() > elementRange.getLength() ? null
                             : elementRange.cutOut(infoRange2);
-                    getTextRanges(textRange,editor);
                     if (infoRange2 != null) {
                         if(textRange2.getEndOffset() == textRange.getEndOffset() && textRange2.getStartOffset() == textRange.getStartOffset()){
                             continue;
@@ -264,7 +263,6 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
                         new TextAttributes(null, null, editor.getColorsScheme().getColor(EditorColors.CARET_COLOR), EffectType.BOXED, Font.PLAIN),
                         HighlighterTargetArea.EXACT_RANGE);
                 boxHighlighter.putUserData(IN_PREVIEW_USAGE_FLAG, Boolean.TRUE);
-                getTextRanges(textRange,editor);
                 editor.getCaretModel().moveToOffset(infoRange.getEndOffset());
             } else {
                 editor.getCaretModel().moveToOffset(textRange.getEndOffset());
@@ -326,9 +324,9 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
                 count += lines[i].length() + 1;
             }
         }
-        var currentLine = lines[currentLineNumber];
+        var currentLine = lines[currentLineNumber -1];
         var charsBefore = 0;
-        for(int i = 0; i < currentLineNumber; i++) {
+        for(int i = 0; i < currentLineNumber -1; i++) {
             charsBefore += lines[i].length() + 1;
         }
         if(MyFindPopupPanel.searchWords.length > 0){
