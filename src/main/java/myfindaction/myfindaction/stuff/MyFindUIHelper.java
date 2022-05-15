@@ -118,6 +118,8 @@ public class MyFindUIHelper implements Disposable {
 
     @Override
     public void dispose() {
+        System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
+        System.out.println("Disposed");
         if (myUI != null && !Disposer.isDisposed(myUI.getDisposable())) {
             Disposer.dispose(myUI.getDisposable());
         }

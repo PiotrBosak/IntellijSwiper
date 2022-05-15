@@ -39,6 +39,8 @@ import com.intellij.usages.impl.UsageContextPanelBase;
 import com.intellij.usages.impl.UsageViewImpl;
 import com.intellij.util.ui.PositionTracker;
 import com.intellij.util.ui.StatusText;
+import com.maddyhome.idea.vim.VimPlugin;
+import com.maddyhome.idea.vim.helper.Direction;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -212,6 +214,7 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
                 }
             }
             // highlight injected element in host document textrange
+
             textRange = InjectedLanguageManager.getInstance(project).injectedToHost(psiElement, textRange);
             if (MyFindPopupPanel.myCoolUsages != null) {
                 for (int j = 0; j < MyFindPopupPanel.myCoolUsages.size(); j++) {

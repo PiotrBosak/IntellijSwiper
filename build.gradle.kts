@@ -17,6 +17,7 @@ intellij {
     type.set("IC") // Target IDE Platform
 
     plugins.set(listOf(/* Plugin Dependencies */))
+    plugins.set(listOf("IdeaVIM:1.10.1"))
 }
 
 tasks {
