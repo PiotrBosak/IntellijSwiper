@@ -129,6 +129,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
     private static final KeyStroke ENTER = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
     private static final KeyStroke PREVIOUS = KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.ALT_DOWN_MASK);
     private static final KeyStroke NEXT = KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.ALT_DOWN_MASK);
+    private static final KeyStroke CLEAR = KeyStroke.getKeyStroke(KeyEvent.VK_U, KeyEvent.CTRL_DOWN_MASK);
     private static final KeyStroke ENTER_WITH_MODIFIERS = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, SystemInfo.isMac
             ? InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK);
     private static final KeyStroke REPLACE_ALL = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK | InputEvent.ALT_DOWN_MASK);
@@ -178,6 +179,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
 
     private AnAction previousEntryAction;
     private AnAction nextEntryAction;
+    private AnAction clearTextAction;
     private boolean mySuggestRegexHintForEmptyResults = true;
     private JBSplitter myPreviewSplitter;
 
@@ -480,8 +482,10 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
 
         previousEntryAction = DumbAwareAction.create(event -> showPreviousEntry());
         nextEntryAction = DumbAwareAction.create(event -> showNextEntry());
+        clearTextAction = DumbAwareAction.create(event -> mySearchComponent.setText(""));
         previousEntryAction.registerCustomShortcutSet(new CustomShortcutSet(PREVIOUS), this);
         nextEntryAction.registerCustomShortcutSet(new CustomShortcutSet(NEXT), this);
+        clearTextAction.registerCustomShortcutSet(new CustomShortcutSet(CLEAR), this);
         myOKButton = new JButton(FindBundle.message("find.popup.find.button"));
         myOkActionListener = __ -> doOK(true);
         myOKButton.addActionListener(myOkActionListener);
@@ -1053,20 +1057,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
 
 
 
-                //todo tutaj jest kod ktory pokazuje jak
-                try {
-                    var search = VimPlugin.getSearch();
-                    var editor = FileEditorManager.getInstance(myProject).getSelectedTextEditor();
-                    if (editor != null) {
-                        search.setLastSearchState(editor, s, "", Direction.FORWARDS);
-                        SearchHighlightsHelper.updateSearchHighlights("hello", false, true, true);
-                    }
-                } catch (Exception e) {
-
-                }
-
-
-
                 findModel.setStringToFind(s);
                 findModel.setRegularExpressions(true);
                 projectExecutor.findUsages(myProject, myResultsPreviewSearchProgress, processPresentation, findModel, filesToScanInitially, usage -> {
@@ -1405,6 +1395,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
             var editor = FileEditorManager.getInstance(myProject).getSelectedTextEditor();
             if (editor != null)
                 search.setLastSearchState(editor, currentSearchAfterChanges, "", Direction.FORWARDS);
+
         } catch (Exception ignore) {
 
         }
