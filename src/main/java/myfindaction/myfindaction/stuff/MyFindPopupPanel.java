@@ -629,7 +629,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         }
         myUsagePreviewTitle = new SimpleColoredComponent();
         myUsageViewPresentation = new UsageViewPresentation();
-        //todo to jest chyba to co pokazuje kod
         myUsagePreviewPanel = new MyUsagePreviewPanel(myProject, myUsageViewPresentation, true) {
             @Override
             public Dimension getPreferredSize() {
@@ -727,31 +726,13 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
 
         myIsPinned.set(UISettings.getInstance().getPinFindInPath());
 
-        JBInsets textFieldBorderInsets = JBUI.CurrentTheme.ComplexPopup.textFieldBorderInsets();
-        if (ExperimentalUI.isNewUI()) {
-            Color background = JBUI.CurrentTheme.Popup.BACKGROUND;
-            Insets headerInsets = JBUI.CurrentTheme.ComplexPopup.headerInsets();
-            int verticalGap = SpacingConfiguration.createIntelliJSpacingConfiguration().getVerticalComponentGap();
-            headerInsets.top -= verticalGap;
-            headerInsets.bottom -= verticalGap;
-            setBackground(background);
-            mySearchTextArea.setOpaque(false);
-            mySearchTextArea.setBorder(PopupUtil.createComplexPopupTextFieldBorder());
-            myReplaceTextArea.setOpaque(false);
-            myReplaceTextArea.setBorder(PopupUtil.createComplexPopupTextFieldBorder());
-            myUsagePreviewTitle.setBorder(JBUI.Borders.empty(12, 8, 5, 0));
-            myResultsPreviewTable.setBackground(background);
-            previewPanel.setBackground(background);
-            myPreviewSplitter.setBorder(JBUI.Borders.empty(0, textFieldBorderInsets.getUnscaled().left, 0, textFieldBorderInsets.getUnscaled().right));
-        } else {
-            mySearchTextArea.setBorder(JBUI.Borders.compound(
-                    JBUI.Borders.customLine(JBUI.CurrentTheme.BigPopup.searchFieldBorderColor(), 1, 0, 1, 0),
-                    JBUI.Borders.empty(1, 0, 2, 0)));
-            myReplaceTextArea.setBorder(JBUI.Borders.compound(
-                    JBUI.Borders.customLine(JBUI.CurrentTheme.BigPopup.searchFieldBorderColor(), 0, 0, 1, 0),
-                    JBUI.Borders.empty(1, 0, 2, 0)));
-            myUsagePreviewTitle.setBorder(JBUI.Borders.empty(3, 8, 4, 8));
-        }
+        mySearchTextArea.setBorder(JBUI.Borders.compound(
+                JBUI.Borders.customLine(JBUI.CurrentTheme.BigPopup.searchFieldBorderColor(), 1, 0, 1, 0),
+                JBUI.Borders.empty(1, 0, 2, 0)));
+        myReplaceTextArea.setBorder(JBUI.Borders.compound(
+                JBUI.Borders.customLine(JBUI.CurrentTheme.BigPopup.searchFieldBorderColor(), 0, 0, 1, 0),
+                JBUI.Borders.empty(1, 0, 2, 0)));
+        myUsagePreviewTitle.setBorder(JBUI.Borders.empty(3, 8, 4, 8));
 
         add(mySearchTextArea, "pushx, growx, wrap");
         add(myReplaceTextArea, "pushx, growx, wrap");
@@ -821,14 +802,11 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                 final Vector<UsageInfoAdapter> v = (Vector) convertToVector(rowData);
                 if (dataVector.isEmpty()) {
                     addRow(v);
-                    //todo to wyglada bardzo ciekawie
                 } else {
                     firstResultPath = v.get(0).getPath();
                     int p = Collections.binarySearch((Vector<Vector<UsageInfoAdapter>>) ((Vector) dataVector), v, COMPARATOR);
                     if (p < 0) {
                         // only insert when not already present.
-                        //TODO ogolnie ten obiekt to jest ta tabela, tutaj sa dodawne te rowy, trzeb wykmninic gdzie
-                        // jest uzywane te rowy do displaya
                         int row = -(p + 1);
                         this.insertRow(row, v);
                     }
@@ -857,8 +835,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                         myResultsPreviewTable.getSelectionModel().setSelectionInterval(l.second, l.second);
 //                    myResultsPreviewTable.getSelectionModel().setLeadSelectionIndex(l);
                     });
-                }
-                else {
+                } else {
                     myResultsPreviewTable.getSelectionModel().setSelectionInterval(0, 0);
                 }
             }
@@ -1093,7 +1070,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                 currentSearchAfterChanges = s;
 
 
-
                 //todo tutaj jest kod ktory pokazuje jak
                 try {
                     var search = VimPlugin.getSearch();
@@ -1105,7 +1081,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                 } catch (Exception e) {
 
                 }
-
 
 
                 findModel.setStringToFind(s);
@@ -1450,6 +1425,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
             var editor = FileEditorManager.getInstance(myProject).getSelectedTextEditor();
             if (editor != null)
                 search.setLastSearchState(editor, currentSearchAfterChanges, "", Direction.FORWARDS);
+
         } catch (Exception ignore) {
 
         }
@@ -1710,6 +1686,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
             myPopupState.prepareToShow(listPopup);
         }
     }
+
 
     static class UsageTableCellRenderer extends JPanel implements TableCellRenderer {
         private final ColoredTableCellRenderer myUsageRenderer = new ColoredTableCellRenderer() {
