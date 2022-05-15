@@ -1412,6 +1412,16 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
     }
 
     private void navigateToSelectedUsage(@Nullable AnActionEvent e) {
+        System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYY");
+        System.out.println("selected");
+        try {
+            var search = VimPlugin.getSearch();
+            var editor = FileEditorManager.getInstance(myProject).getSelectedTextEditor();
+            if (editor != null)
+                search.setLastSearchState(editor, currentSearchAfterChanges, "", Direction.FORWARDS);
+        } catch (Exception ignore) {
+
+        }
         Navigatable[] navigatables = e != null ? e.getData(CommonDataKeys.NAVIGATABLE_ARRAY) : null;
         if (navigatables != null) {
             if (canBeClosed()) {
