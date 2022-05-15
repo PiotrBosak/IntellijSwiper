@@ -52,6 +52,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -325,6 +326,7 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
             }
         }
         var currentLine = lines[currentLineNumber -1];
+        currentLine = currentLine.toUpperCase(Locale.ROOT);
         var charsBefore = 0;
         for(int i = 0; i < currentLineNumber -1; i++) {
             charsBefore += lines[i].length() + 1;
@@ -332,6 +334,7 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
         if(MyFindPopupPanel.searchWords.length > 0){
             var currentPosition = 0;
             for(var word : MyFindPopupPanel.searchWords) {
+                word = word.toUpperCase(Locale.ROOT);
                var wordStart =  currentLine.indexOf(word, currentPosition);
                if(wordStart == -1) {
                    break;
