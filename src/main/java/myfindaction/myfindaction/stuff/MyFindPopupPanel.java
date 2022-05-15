@@ -77,6 +77,13 @@ import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.ui.*;
+import com.maddyhome.idea.vim.VimPlugin;
+import com.maddyhome.idea.vim.common.TextRange;
+import com.maddyhome.idea.vim.helper.Direction;
+import com.maddyhome.idea.vim.helper.SearchHelper;
+import com.maddyhome.idea.vim.helper.SearchHelperKtKt;
+import com.maddyhome.idea.vim.helper.SearchHighlightsHelper;
+import com.maddyhome.idea.vim.vimscript.services.OptionService;
 import myfindaction.myfindaction.StringConverter;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.Contract;
@@ -116,6 +123,7 @@ import static com.intellij.util.FontUtil.spaceAndThinSpace;
 public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindUI {
     public static FindPopupScopeUI.ScopeType globalScopeType;
     public static List<UsageInfo> myCoolUsages;
+    public static String currentSearchAfterChanges = "";
     public static GlobalSearchScope fileScope;
     private static final KeyStroke ENTER = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
     private static final KeyStroke PREVIOUS = KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.ALT_DOWN_MASK);
@@ -690,7 +698,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         String btnGapLeft = "gapleft " + Math.max(0, JBUIScale.scale(12) - insets.left - insets.right);
 
 
-        //todo to jest to na pewno, trzeba ogarnac jak zaznacyc wszystkie linie
         myCodePreviewComponent = myUsagePreviewPanel.createComponent();
         JPanel previewPanel = new JPanel(new BorderLayout());
         previewPanel.add(myUsagePreviewTitle, BorderLayout.NORTH);
@@ -1038,6 +1045,24 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                 String s = findModel.isProjectScope() ?
                         converter.convertPermutations(findModel.getStringToFind()) :
                         converter.convert(findModel.getStringToFind());
+                currentSearchAfterChanges = s;
+
+
+
+                //todo tutaj jest kod ktory pokazuje jak
+                try {
+                    var search = VimPlugin.getSearch();
+                    var editor = FileEditorManager.getInstance(myProject).getSelectedTextEditor();
+                    if (editor != null) {
+                        search.setLastSearchState(editor, s, "", Direction.FORWARDS);
+                        SearchHighlightsHelper.updateSearchHighlights("hello", false, true, true);
+                    }
+                } catch (Exception e) {
+
+                }
+
+
+
                 findModel.setStringToFind(s);
                 findModel.setRegularExpressions(true);
                 projectExecutor.findUsages(myProject, myResultsPreviewSearchProgress, processPresentation, findModel, filesToScanInitially, usage -> {
@@ -1115,6 +1140,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                 if (isShowing() && progressIndicatorWhenSearchStarted == myResultsPreviewSearchProgress) {
                     scheduleResultsUpdate();
                 }
+
             }
 
             boolean isCancelled() {
