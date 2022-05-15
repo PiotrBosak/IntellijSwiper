@@ -124,6 +124,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
     public static FindPopupScopeUI.ScopeType globalScopeType;
     public static List<UsageInfo> myCoolUsages;
     public static String currentSearchAfterChanges = "";
+    public static String[] searchWords = new String[]{};
     public static GlobalSearchScope fileScope;
     private static final KeyStroke ENTER = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
     private static final KeyStroke PREVIOUS = KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.ALT_DOWN_MASK);
@@ -1042,6 +1043,9 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                     findModel.setCustomScope(fileScope);
                 }
                 StringConverter converter = new StringConverter();
+                searchWords = findModel
+                        .getStringToFind()
+                        .split(" ");
                 String s = findModel.isProjectScope() ?
                         converter.convertPermutations(findModel.getStringToFind()) :
                         converter.convert(findModel.getStringToFind());
