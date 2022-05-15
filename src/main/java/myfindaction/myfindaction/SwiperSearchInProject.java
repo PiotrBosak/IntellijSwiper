@@ -42,8 +42,13 @@ public class SwiperSearchInProject extends AnAction {
     }
 
     public void update(AnActionEvent e) {
-        FindInPathAction action = new FindInPathAction();
-        action.update(e);
+        try {
+            FindInPathAction action = new FindInPathAction();
+            action.update(e);
+        }
+        catch (Exception ignore) {
+
+        }
     }
 
 }
