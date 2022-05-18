@@ -1,6 +1,5 @@
 package myfindaction.myfindaction.stuff
 
-import com.intellij.execution.target.fixHighlightingOfUiDslComponents
 import com.intellij.find.FindBundle
 import com.intellij.find.FindUsagesCollector
 import com.intellij.find.impl.FindPopupPanel

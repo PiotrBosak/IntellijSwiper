@@ -274,7 +274,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
             final Window window = WindowManager.getInstance().suggestParentWindow(myProject);
             Component parent = UIUtil.findUltimateParent(window);
             RelativePoint showPoint = null;
-            Point screenPoint = DimensionService.getInstance().getLocation(SERVICE_KEY);
+            Point screenPoint = DimensionService.getInstance().getLocation(SERVICE_KEY, myProject);
             if (screenPoint != null) {
                 if (parent != null) {
                     SwingUtilities.convertPointFromScreen(screenPoint, parent);
@@ -299,7 +299,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
             addMouseListener(windowListener);
             addMouseMotionListener(windowListener);
             Dimension panelSize = getPreferredSize();
-            Dimension prev = DimensionService.getInstance().getSize(SERVICE_KEY);
+            Dimension prev = DimensionService.getInstance().getSize(SERVICE_KEY, myProject);
             panelSize.width += JBUIScale.scale(24);//hidden 'loading' icon
             panelSize.height *= 2;
             if (prev != null && prev.height < panelSize.height) prev.height = panelSize.height;
@@ -736,8 +736,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
 
         add(mySearchTextArea, "pushx, growx, wrap");
         add(myReplaceTextArea, "pushx, growx, wrap");
-        add(myPreviewSplitter, "pushx, growx, growy, pushy, wrap" +
-                (ExperimentalUI.isNewUI() ? ", gap " + textFieldBorderInsets.left + " " + textFieldBorderInsets.right + " 0 0" : ""));
+        add(myPreviewSplitter, "pushx, growx, growy, pushy, wrap");
 
         List<Component> focusOrder = new ArrayList<>();
         focusOrder.add(mySearchComponent);
