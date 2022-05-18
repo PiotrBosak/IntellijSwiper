@@ -17,7 +17,6 @@ import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.ex.util.EditorUtil;
 import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.Balloon;
@@ -40,8 +39,6 @@ import com.intellij.usages.impl.UsageContextPanelBase;
 import com.intellij.usages.impl.UsageViewImpl;
 import com.intellij.util.ui.PositionTracker;
 import com.intellij.util.ui.StatusText;
-import com.maddyhome.idea.vim.VimPlugin;
-import com.maddyhome.idea.vim.helper.Direction;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,6 +49,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -226,13 +224,14 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
                             || infoRange2.getStartOffset() > elementRange.getLength()
                             || infoRange2.getEndOffset() > elementRange.getLength() ? null
                             : elementRange.cutOut(infoRange2);
-                    getTextRanges(textRange,editor);
                     if (infoRange2 != null) {
                         if(textRange2.getEndOffset() == textRange.getEndOffset() && textRange2.getStartOffset() == textRange.getStartOffset()){
                             continue;
                         }
                         InjectedLanguageManager.getInstance(project).injectedToHost(psiElement, infoRange2);
-                        var intervals = getTextRanges(textRange2,editor);
+                        var intervals = MyFindPopupPanel.fileScope == null ?
+                                getTextRangesInProject(textRange2,editor) :
+                                getTextRangesInFile(textRange2,editor);
                         for(var interval:intervals){
                             RangeHighlighter highlighter = markupModel.addRangeHighlighter(EditorColors.WRITE_SEARCH_RESULT_ATTRIBUTES,
                                     interval.getFirst(),
@@ -245,7 +244,9 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
                 }
             }
 
-            var intervals = getTextRanges(textRange,editor);
+            var intervals = MyFindPopupPanel.fileScope == null ?
+                    getTextRangesInProject(textRange,editor) :
+                    getTextRangesInFile(textRange,editor);
             for(var interval:intervals) {
                 RangeHighlighter highlighter = markupModel.addRangeHighlighter(EditorColors.SEARCH_RESULT_ATTRIBUTES,
                         interval.getFirst(),
@@ -264,7 +265,6 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
                         new TextAttributes(null, null, editor.getColorsScheme().getColor(EditorColors.CARET_COLOR), EffectType.BOXED, Font.PLAIN),
                         HighlighterTargetArea.EXACT_RANGE);
                 boxHighlighter.putUserData(IN_PREVIEW_USAGE_FLAG, Boolean.TRUE);
-                getTextRanges(textRange,editor);
                 editor.getCaretModel().moveToOffset(infoRange.getEndOffset());
             } else {
                 editor.getCaretModel().moveToOffset(textRange.getEndOffset());
@@ -308,7 +308,7 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
             //Not a problem, just don't show balloon in this case
         }
     }
-    private static List<Pair<Integer, Integer>> getTextRanges(TextRange original, Editor editor) {
+    private static List<Pair<Integer, Integer>> getTextRangesInFile(TextRange original, Editor editor) {
         var intervals = new ArrayList<Pair<Integer,Integer>>();
         var lines = editor
                 .getDocument()
@@ -318,7 +318,7 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
         var count = 0;
         var currentLineNumber = 0;
         for(int i = 0; i < lines.length; i++) {
-            if(count >= startOffset) {
+            if(count > startOffset) {
                 currentLineNumber = i;
                 break;
             }
@@ -326,14 +326,16 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
                 count += lines[i].length() + 1;
             }
         }
-        var currentLine = lines[currentLineNumber];
+        var currentLine = lines[currentLineNumber -1];
+        currentLine = currentLine.toUpperCase(Locale.ROOT);
         var charsBefore = 0;
-        for(int i = 0; i < currentLineNumber; i++) {
+        for(int i = 0; i < currentLineNumber -1; i++) {
             charsBefore += lines[i].length() + 1;
         }
         if(MyFindPopupPanel.searchWords.length > 0){
             var currentPosition = 0;
             for(var word : MyFindPopupPanel.searchWords) {
+                word = word.toUpperCase(Locale.ROOT);
                var wordStart =  currentLine.indexOf(word, currentPosition);
                if(wordStart == -1) {
                    break;
@@ -342,6 +344,44 @@ public class MyUsagePreviewPanel extends UsageContextPanelBase implements DataPr
                    intervals.add(new Pair<>(charsBefore + wordStart, charsBefore + wordStart+ word.length()));
                    currentPosition = wordStart + word.length();
                }
+            }
+
+        }
+        return intervals;
+    }
+    private static List<Pair<Integer, Integer>> getTextRangesInProject(TextRange original, Editor editor) {
+        var intervals = new ArrayList<Pair<Integer,Integer>>();
+        var lines = editor
+                .getDocument()
+                .getText()
+                .split("\n");
+        var startOffset = original.getStartOffset();
+        var count = 0;
+        var currentLineNumber = 0;
+        for(int i = 0; i < lines.length; i++) {
+            if(count > startOffset) {
+                currentLineNumber = i;
+                break;
+            }
+            else {
+                count += lines[i].length() + 1;
+            }
+        }
+        var currentLine = lines[currentLineNumber -1];
+        currentLine = currentLine.toUpperCase(Locale.ROOT);
+        var charsBefore = 0;
+        for(int i = 0; i < currentLineNumber -1; i++) {
+            charsBefore += lines[i].length() + 1;
+        }
+        if (MyFindPopupPanel.searchWords.length > 0) {
+            for (var word : MyFindPopupPanel.searchWords) {
+                word = word.toUpperCase(Locale.ROOT);
+                var currentPosition = 0;
+                while (currentLine.indexOf(word, currentPosition) != -1) {
+                    var wordStart = currentLine.indexOf(word, currentPosition);
+                    intervals.add(new Pair<>(charsBefore + wordStart, charsBefore + wordStart + word.length()));
+                    currentPosition = wordStart + word.length();
+                }
             }
 
         }
