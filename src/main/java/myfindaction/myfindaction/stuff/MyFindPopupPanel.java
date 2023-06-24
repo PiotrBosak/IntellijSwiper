@@ -24,6 +24,10 @@ import com.intellij.openapi.actionSystem.impl.ActionButtonWithText;
 import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.ScrollType;
+import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.UniqueVFilePathBuilder;
 import com.intellij.openapi.help.HelpManager;
@@ -113,6 +117,9 @@ import static com.intellij.ui.SimpleTextAttributes.STYLE_PLAIN;
 import static com.intellij.util.FontUtil.spaceAndThinSpace;
 
 public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindUI {
+    public static Editor currentEditor;
+    public static int currentLine;
+    public static boolean wasSelected;
     public static FindPopupScopeUI.ScopeType globalScopeType;
     public static List<UsageInfo> myCoolUsages;
     public static String currentSearchAfterChanges = "";
@@ -658,6 +665,21 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
             });
         };
         myResultsPreviewTable.getSelectionModel().addListSelectionListener(e -> {
+            System.out.println("QQQQQQQQQQQQ");
+            if (myResultsPreviewTable.getSelectedRow() != -1 && currentEditor != null && fileScope != null) {
+                var usage = (UsageInfo2UsageAdapter) myResultsPreviewTableModel.getDataVector().get(myResultsPreviewTable.getSelectedRow()).get(0);
+                var scrollingModel = currentEditor.getScrollingModel();
+                int lineOffset = usage.getDocument().getLineStartOffset(usage.getLine() - 1);
+                var verticalPosition = currentEditor.offsetToLogicalPosition(lineOffset);
+                scrollingModel.scrollTo(verticalPosition, ScrollType.CENTER);
+                currentEditor.getHighlighter().
+
+
+
+            }
+            System.out.println(myResultsPreviewTable.getSelectedRow());
+            System.out.println(currentLine);
+
             if (e.getValueIsAdjusting() || Disposer.isDisposed(myPreviewUpdater)) return;
             myPreviewUpdater.addRequest(updatePreviewRunnable, 50); //todo[vasya]: remove this dirty hack of updating preview panel after clicking on Replace button
         });
@@ -1056,9 +1078,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                 currentSearchAfterChanges = s;
 
 
-                //todo tutaj jest kod ktory pokazuje jak
-
-
                 findModel.setStringToFind(s);
                 findModel.setRegularExpressions(true);
                 projectExecutor.findUsages(myProject, myResultsPreviewSearchProgress, processPresentation, findModel, filesToScanInitially, usage -> {
@@ -1395,6 +1414,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
 
     private void navigateToSelectedUsage(@Nullable AnActionEvent e) {
         System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYY");
+        wasSelected = true;
         System.out.println("selected");
         Navigatable[] navigatables = e != null ? e.getData(CommonDataKeys.NAVIGATABLE_ARRAY) : null;
         if (navigatables != null) {

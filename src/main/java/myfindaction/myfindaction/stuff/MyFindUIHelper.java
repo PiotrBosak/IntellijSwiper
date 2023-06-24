@@ -10,6 +10,7 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.text.StringUtil;
@@ -120,6 +121,10 @@ public class MyFindUIHelper implements Disposable {
     public void dispose() {
         System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
         System.out.println("Disposed");
+        if (!MyFindPopupPanel.wasSelected && MyFindPopupPanel.currentEditor != null) {
+            var scrollingModel = MyFindPopupPanel.currentEditor.getScrollingModel();
+            scrollingModel.scrollToCaret(ScrollType.CENTER);
+        }
         if (myUI != null && !Disposer.isDisposed(myUI.getDisposable())) {
             Disposer.dispose(myUI.getDisposable());
         }
