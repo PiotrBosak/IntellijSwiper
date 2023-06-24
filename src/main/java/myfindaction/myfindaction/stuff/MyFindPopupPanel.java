@@ -3,6 +3,7 @@ package myfindaction.myfindaction.stuff;
 
 import com.intellij.CommonBundle;
 import com.intellij.accessibility.TextFieldWithListAccessibleContext;
+import com.intellij.diff.util.DiffDrawUtil;
 import com.intellij.find.*;
 import com.intellij.find.actions.ShowUsagesAction;
 import com.intellij.find.impl.*;
@@ -27,6 +28,7 @@ import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ScrollType;
+import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.UniqueVFilePathBuilder;
@@ -120,6 +122,8 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
     public static Editor currentEditor;
     public static int currentLine;
     public static boolean wasSelected;
+    public static RangeHighlighter highlighter;
+
     public static FindPopupScopeUI.ScopeType globalScopeType;
     public static List<UsageInfo> myCoolUsages;
     public static String currentSearchAfterChanges = "";
@@ -399,6 +403,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
             }
             ApplicationManager.getApplication().invokeLater(this::scheduleResultsUpdate, ModalityState.any());
         }
+        clear();
     }
 
     public void closeIfPossible() {
@@ -673,10 +678,26 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                 var verticalPosition = currentEditor.offsetToLogicalPosition(lineOffset);
                 scrollingModel.scrollTo(verticalPosition, ScrollType.CENTER);
 
+                MarkupModel markupModel = currentEditor.getMarkupModel();
+
+                int lineStartOffset = currentEditor.getDocument().getLineStartOffset(usage.getLine());
+                int lineEndOffset = currentEditor.getDocument().getLineEndOffset(usage.getLine());
+//                var sth = currentEditor.getDocument().getText(new TextRange(lineStartOffset, lineEndOffset));
+
+
+                Key<Boolean> IN_PREVIEW_USAGE_FLAG = Key.create("IN_PREVIEW_USAGE_FLAG");
+                if (highlighter != null) {
+                    highlighter.dispose();
+                }
+                highlighter = markupModel.addRangeHighlighter(EditorColors.WRITE_SEARCH_RESULT_ATTRIBUTES,
+                        lineStartOffset,
+                        lineEndOffset,
+                        HighlighterLayer.ADDITIONAL_SYNTAX,
+                        HighlighterTargetArea.EXACT_RANGE);
+
+                highlighter.putUserData(IN_PREVIEW_USAGE_FLAG, Boolean.TRUE);
 
             }
-            System.out.println(myResultsPreviewTable.getSelectedRow());
-            System.out.println(currentLine);
 
             if (e.getValueIsAdjusting() || Disposer.isDisposed(myPreviewUpdater)) return;
             myPreviewUpdater.addRequest(updatePreviewRunnable, 50); //todo[vasya]: remove this dirty hack of updating preview panel after clicking on Replace button

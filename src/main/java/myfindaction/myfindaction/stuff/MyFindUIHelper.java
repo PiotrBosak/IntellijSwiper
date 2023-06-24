@@ -121,6 +121,7 @@ public class MyFindUIHelper implements Disposable {
     public void dispose() {
         System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
         System.out.println("Disposed");
+        System.out.println();
         if (!MyFindPopupPanel.wasSelected && MyFindPopupPanel.currentEditor != null) {
             var scrollingModel = MyFindPopupPanel.currentEditor.getScrollingModel();
             scrollingModel.scrollToCaret(ScrollType.CENTER);

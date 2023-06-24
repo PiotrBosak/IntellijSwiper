@@ -40,6 +40,7 @@ public class SwiperSearchInFile extends AnAction {
             FindModel findModel = new FindModel();
             findModel.setCustomScope(true);
             MyFindPopupPanel.currentEditor = editor;
+            MyFindPopupPanel.wasSelected = false;
 
             SelectionModel selectionModel = editor.getSelectionModel();
 //            Caret primaryCaret = editor.getCaretModel().getPrimaryCaret();
