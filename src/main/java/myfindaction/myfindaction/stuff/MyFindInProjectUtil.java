@@ -4,7 +4,6 @@ import com.intellij.find.*;
 import com.intellij.find.findInProject.FindInProjectManager;
 import com.intellij.find.impl.FindInProjectExtension;
 import com.intellij.find.impl.FindInProjectUtil;
-import com.intellij.find.impl.FindResultUsageInfo;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.DataManager;
 import com.intellij.lang.LangBundle;
@@ -300,7 +299,7 @@ public class MyFindInProjectUtil {
                 final TextRange range = new TextRange(result.getStartOffset(), result.getEndOffset());
                 if (!((LocalSearchScope)customScope).containsRange(psiFile, range)) continue;
             }
-            UsageInfo info = new FindResultUsageInfo(findManager, psiFile, prevOffset, findModel, result);
+            UsageInfo info = new MyFindResultUsageInfo(findManager, psiFile, prevOffset, findModel, result);
             if(MyFindPopupPanel.myCoolUsages == null){
                 MyFindPopupPanel.myCoolUsages = new ArrayList<>();
                 MyFindPopupPanel.myCoolUsages.add(info);

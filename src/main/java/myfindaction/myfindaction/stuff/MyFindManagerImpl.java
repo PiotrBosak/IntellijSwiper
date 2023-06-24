@@ -1,76 +1,26 @@
 package myfindaction.myfindaction.stuff;
 
 
-import com.intellij.codeInsight.highlighting.HighlightManager;
-import com.intellij.codeInsight.highlighting.HighlightManagerImpl;
-import com.intellij.codeInsight.hint.HintManager;
-import com.intellij.codeInsight.hint.HintManagerImpl;
-import com.intellij.codeInsight.hint.HintUtil;
-import com.intellij.concurrency.ConcurrentCollectionFactory;
-import com.intellij.find.*;
+import com.intellij.find.FindInProjectSettings;
+import com.intellij.find.FindManager;
+import com.intellij.find.FindModel;
+import com.intellij.find.FindResult;
 import com.intellij.find.findUsages.FindUsagesManager;
 import com.intellij.find.impl.FindManagerImpl;
-import com.intellij.find.impl.FindResultImpl;
-import com.intellij.find.impl.FindUIHelper;
-import com.intellij.find.impl.RegExReplacementBuilder;
-import com.intellij.find.impl.livePreview.SearchResults;
-import com.intellij.lang.Language;
-import com.intellij.lang.LanguageParserDefinitions;
-import com.intellij.lang.LanguageUtil;
-import com.intellij.lang.ParserDefinition;
-import com.intellij.lexer.LayeredLexer;
-import com.intellij.lexer.Lexer;
 import com.intellij.navigation.NavigationItem;
-import com.intellij.notification.NotificationGroup;
-import com.intellij.notification.NotificationGroupManager;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.impl.NotificationsConfigurationImpl;
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.IdeActions;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ReadAction;
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.*;
-import com.intellij.openapi.editor.colors.TextAttributesKey;
-import com.intellij.openapi.editor.ex.FoldingModelEx;
-import com.intellij.openapi.editor.markup.RangeHighlighter;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.TextEditor;
-import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.fileTypes.PlainSyntaxHighlighter;
-import com.intellij.openapi.fileTypes.SyntaxHighlighter;
-import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory;
-import com.intellij.openapi.fileTypes.impl.AbstractFileType;
-import com.intellij.openapi.keymap.KeymapUtil;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.*;
+import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.util.NlsContexts;
+import com.intellij.openapi.util.NlsSafe;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.patterns.StringPattern;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.SearchScope;
-import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.tree.TokenSet;
-import com.intellij.reference.SoftReference;
-import com.intellij.ui.LightweightHint;
-import com.intellij.ui.ReplacePromptDialog;
-import com.intellij.usages.ChunkExtractor;
-import com.intellij.usages.impl.SyntaxHighlighterOverEditorHighlighter;
-import com.intellij.util.containers.IntObjectMap;
-import com.intellij.util.text.CharArrayUtil;
-import com.intellij.util.text.ImmutableCharSequence;
-import com.intellij.util.text.StringSearcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.*;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 public class MyFindManagerImpl extends FindManager {
@@ -78,6 +28,7 @@ public class MyFindManagerImpl extends FindManager {
     private final Project myProject;
     private MyFindUIHelper myHelper;
     private final FindModel myFindInProjectModel = new FindModel();
+
 
     public MyFindManagerImpl(FindManagerImpl manager, Project myProject) {
         this.manager = manager;
@@ -113,6 +64,11 @@ public class MyFindManagerImpl extends FindManager {
         }
 
         this.myHelper.showUI();
+    }
+
+    @Override
+    public void closeFindDialog() {
+
     }
 
     public int showPromptDialog(@NotNull FindModel model, @NlsContexts.DialogTitle String title) {
@@ -211,6 +167,9 @@ public class MyFindManagerImpl extends FindManager {
 
     public boolean findPreviousUsageInEditor(@NotNull Editor editor) {
         return this.manager.findPreviousUsageInEditor(editor);
+    }
+
+    static void clearPreviousFindData(FindModel model) {
     }
 
     @NotNull

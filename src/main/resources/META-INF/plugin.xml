@@ -21,13 +21,9 @@
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
-    <depends>IdeaVIM</depends>
 
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
-    <extensions defaultExtensionNs="IdeaVIM">
-        <vimExtension implementation="myfindaction.myfindaction.SwiperSearchInFile"/>
-    </extensions>
     <actions>
         <action id="SwiperSearchInFile" class="myfindaction.myfindaction.SwiperSearchInFile" text="SwiperSearchInFile"/>
         <action id="SwiperSearchInProject" class="myfindaction.myfindaction.SwiperSearchInProject" text="SwiperSearchInProject"/>

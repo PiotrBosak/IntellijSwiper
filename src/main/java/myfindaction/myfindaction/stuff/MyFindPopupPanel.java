@@ -3,7 +3,6 @@ package myfindaction.myfindaction.stuff;
 
 import com.intellij.CommonBundle;
 import com.intellij.accessibility.TextFieldWithListAccessibleContext;
-import com.intellij.execution.runners.ExecutionUtil;
 import com.intellij.find.*;
 import com.intellij.find.actions.ShowUsagesAction;
 import com.intellij.find.impl.*;
@@ -25,10 +24,6 @@ import com.intellij.openapi.actionSystem.impl.ActionButtonWithText;
 import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.command.CommandProcessor;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.event.DocumentListener;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.UniqueVFilePathBuilder;
 import com.intellij.openapi.help.HelpManager;
@@ -44,7 +39,6 @@ import com.intellij.openapi.ui.*;
 import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.ListPopup;
-import com.intellij.openapi.ui.popup.util.PopupUtil;
 import com.intellij.openapi.util.*;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
@@ -81,13 +75,6 @@ import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.ui.*;
-import com.maddyhome.idea.vim.VimPlugin;
-import com.maddyhome.idea.vim.common.TextRange;
-import com.maddyhome.idea.vim.helper.Direction;
-import com.maddyhome.idea.vim.helper.SearchHelper;
-import com.maddyhome.idea.vim.helper.SearchHelperKtKt;
-import com.maddyhome.idea.vim.helper.SearchHighlightsHelper;
-import com.maddyhome.idea.vim.vimscript.services.OptionService;
 import myfindaction.myfindaction.StringConverter;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.Contract;
@@ -407,7 +394,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
         }
     }
 
-    private void closeIfPossible() {
+    public void closeIfPossible() {
         if (canBeClosed() && !myIsPinned.get()) {
             myDialog.doCancelAction();
         }
@@ -646,7 +633,7 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                 UsageInfoAdapter adapter = (UsageInfoAdapter) value;
                 file = adapter.getPath();
                 if (adapter.isValid()) {
-                    selectedUsagePromises.add(adapter.getMergedInfosAsync());
+//                    selectedUsagePromises.add(adapter.getMergedInfosAsync());
                 }
             }
 
@@ -1070,16 +1057,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
 
 
                 //todo tutaj jest kod ktory pokazuje jak
-                try {
-                    var search = VimPlugin.getSearch();
-                    var editor = FileEditorManager.getInstance(myProject).getSelectedTextEditor();
-                    if (editor != null) {
-                        search.setLastSearchState(editor, s, "", Direction.FORWARDS);
-                        SearchHighlightsHelper.updateSearchHighlights("hello", false, true, true);
-                    }
-                } catch (Exception e) {
-
-                }
 
 
                 findModel.setStringToFind(s);
@@ -1419,15 +1396,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
     private void navigateToSelectedUsage(@Nullable AnActionEvent e) {
         System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYY");
         System.out.println("selected");
-        try {
-            var search = VimPlugin.getSearch();
-            var editor = FileEditorManager.getInstance(myProject).getSelectedTextEditor();
-            if (editor != null)
-                search.setLastSearchState(editor, currentSearchAfterChanges, "", Direction.FORWARDS);
-
-        } catch (Exception ignore) {
-
-        }
         Navigatable[] navigatables = e != null ? e.getData(CommonDataKeys.NAVIGATABLE_ARRAY) : null;
         if (navigatables != null) {
             if (canBeClosed()) {

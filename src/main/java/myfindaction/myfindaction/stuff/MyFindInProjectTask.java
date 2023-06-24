@@ -61,7 +61,7 @@ import com.intellij.util.indexing.roots.kind.ModuleRootOrigin;
 import com.intellij.util.text.StringSearcher;
 import com.intellij.util.ui.EDT;
 import com.intellij.workspaceModel.ide.WorkspaceModel;
-import com.intellij.workspaceModel.storage.WorkspaceEntityStorage;
+import com.intellij.workspaceModel.storage.EntityStorage;
 import com.intellij.workspaceModel.storage.bridgeEntities.ModuleEntity;
 import com.intellij.workspaceModel.storage.bridgeEntities.ModuleId;
 import org.jetbrains.annotations.NotNull;
@@ -73,6 +73,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static com.intellij.openapi.application.ActionsKt.runReadAction;
 
 public class MyFindInProjectTask {
     private static final Logger LOG = Logger.getInstance(MyFindInProjectTask.class);
@@ -147,7 +149,7 @@ public class MyFindInProjectTask {
             ConcurrentLinkedDeque<VirtualFile> deque = new ConcurrentLinkedDeque<>(
                     ContainerUtil.sorted(filesForFastWordSearch, SEARCH_RESULT_FILE_COMPARATOR));
             AtomicInteger processedFastFiles = new AtomicInteger();
-            FilesScanExecutor.processDequeOnAllThreads(deque, o -> {
+            FilesScanExecutor.processOnAllThreadsInReadActionNoRetries(deque, o -> {
                 boolean result = ReadAction.nonBlocking(() -> fileProcessor.process(o)).executeSynchronously();
                 if (myProgress.isRunning()) {
                     double fraction = (double) processedFastFiles.incrementAndGet() / filesForFastWordSearch.size();
@@ -293,26 +295,31 @@ public class MyFindInProjectTask {
         SearchScope customScope = myFindModel.isCustomScope() ? myFindModel.getCustomScope() : null;
         GlobalSearchScope globalCustomScope = customScope == null ? null : GlobalSearchScopeUtil.toGlobalSearchScope(customScope, myProject);
 
-        boolean checkExcluded = myDirectory != null && !Registry.is("find.search.in.excluded.dirs") &&
-                !ReadAction.compute(() -> myProjectFileIndex.isExcluded(myDirectory));
+        boolean ignoreExcluded = myDirectory != null
+                && !Registry.is("find.search.in.excluded.dirs")
+                && !ReadAction.compute(() -> myProjectFileIndex.isExcluded(myDirectory));
         boolean withSubdirs = myDirectory != null && myFindModel.isWithSubdirectories();
-        boolean locateClassSources = myDirectory != null && myProjectFileIndex.getClassRootForFile(myDirectory) != null;
+        boolean locateClassSources = myDirectory != null && runReadAction(() -> myProjectFileIndex.getClassRootForFile(myDirectory)) != null;
         boolean searchInLibs = globalCustomScope != null && globalCustomScope.isSearchInLibraries();
 
         ConcurrentLinkedDeque<Object> deque = new ConcurrentLinkedDeque<>();
         if (customScope instanceof LocalSearchScope) {
-            deque.addAll(GlobalSearchScopeUtil.getLocalScopeFiles((LocalSearchScope) customScope));
-        } else if (customScope instanceof VirtualFileEnumeration) {
-            // GlobalSearchScope can span files out of project roots e.g. FileScope / FilesScope
-            ContainerUtil.addAll(deque, ((VirtualFileEnumeration) customScope).asIterable());
-        } else if (myDirectory != null) {
+            deque.addAll(GlobalSearchScopeUtil.getLocalScopeFiles((LocalSearchScope)customScope));
+        }
+        else if (customScope instanceof VirtualFileEnumeration) {
+            // GlobalSearchScope can include files out of project roots e.g., FileScope / FilesScope
+            ContainerUtil.addAll(deque, FileBasedIndexEx.toFileIterable(((VirtualFileEnumeration)customScope).asArray()));
+        }
+        else if (myDirectory != null) {
             deque.addAll(withSubdirs ? List.of(myDirectory) : List.of(myDirectory.getChildren()));
-        } else if (myModule != null) {
-            WorkspaceEntityStorage storage = WorkspaceModel.getInstance(myProject).getEntityStorage().getCurrent();
+        }
+        else if (myModule != null) {
+            EntityStorage storage = WorkspaceModel.getInstance(myProject).getCurrentSnapshot();
             ModuleEntity moduleEntity = Objects.requireNonNull(storage.resolve(new ModuleId(myModule.getName())));
             deque.addAll(IndexableEntityProviderMethods.INSTANCE.createIterators(moduleEntity, storage, myProject));
-        } else {
-            deque.addAll(((FileBasedIndexEx) FileBasedIndex.getInstance()).getIndexableFilesProviders(myProject));
+        }
+        else {
+            deque.addAll(((FileBasedIndexEx)FileBasedIndex.getInstance()).getIndexableFilesProviders(myProject));
         }
         deque.addAll(FindModelExtension.EP_NAME.getExtensionList());
 
@@ -320,35 +327,36 @@ public class MyFindInProjectTask {
         Processor<Object> consumer = obj -> {
             ProgressManager.checkCanceled();
             if (obj instanceof IndexableFilesIterator) {
-                IndexableSetOrigin origin = ((IndexableFilesIterator) obj).getOrigin();
+                IndexableSetOrigin origin = ((IndexableFilesIterator)obj).getOrigin();
                 if (!searchInLibs && !(origin instanceof ModuleRootOrigin)) return true;
-                ((IndexableFilesIterator) obj).iterateFiles(myProject, file -> {
+                ((IndexableFilesIterator)obj).iterateFiles(myProject, file -> {
                     if (file.isDirectory()) return true;
                     deque.add(file);
                     return true;
                 }, VirtualFileFilter.ALL);
-            } else if (obj instanceof FindModelExtension) {
-                ((FindModelExtension) obj).iterateAdditionalFiles(myFindModel, myProject, o -> {
+            }
+            else if (obj instanceof FindModelExtension) {
+                ((FindModelExtension)obj).iterateAdditionalFiles(myFindModel, myProject, o -> {
                     if (o.isDirectory()) return true;
                     if (!alreadySearched.contains(o)) {
                         return fileProcessor.process(o);
                     }
                     return true;
                 });
-            } else if (obj instanceof VirtualFile) {
-                VirtualFile file = (VirtualFile) obj;
-                if (file instanceof VirtualFileWithId && visitedFiles.set(((VirtualFileWithId) file).getId())) {
+            }
+            else if (obj instanceof VirtualFile file) {
+                if (file instanceof VirtualFileWithId && visitedFiles.set(((VirtualFileWithId)file).getId())) {
                     return true;
                 }
                 if (!file.isValid()) {
                     return true;
                 }
-                if (checkExcluded && myProjectFileIndex.isExcluded(file)) {
+                if (ignoreExcluded && myProjectFileIndex.isExcluded(file)) {
                     return true;
                 }
-                if (((VirtualFile) obj).isDirectory()) {
+                if (((VirtualFile)obj).isDirectory()) {
                     if (withSubdirs) {
-                        ContainerUtil.addAll(deque, ((VirtualFile) obj).getChildren());
+                        ContainerUtil.addAll(deque, ((VirtualFile)obj).getChildren());
                     }
                     return true;
                 }
@@ -364,25 +372,25 @@ public class MyFindInProjectTask {
                         Pair.NonNull<PsiFile, VirtualFile> pair = findFile(file);
                         if (pair == null) return true;
                         adjustedFile = Objects.requireNonNull(pair.second);
-                    } else {
+                    }
+                    else {
                         return true;
                     }
-                } else {
+                }
+                else {
                     adjustedFile = file;
                 }
                 if (alreadySearched.contains(adjustedFile)) {
                     return true;
                 }
                 return fileProcessor.process(adjustedFile);
-            } else {
+            }
+            else {
                 throw new AssertionError("unknown item: " + obj);
             }
             return true;
         };
-        FilesScanExecutor.processDequeOnAllThreads(deque, o ->
-                ReadAction.nonBlocking(() -> consumer.process(o))
-                        .expireWith(myProject)
-                        .executeSynchronously());
+        FilesScanExecutor.processOnAllThreadsInReadActionWithRetries(deque, consumer::process);
     }
 
     private boolean canRelyOnSearchers() {
