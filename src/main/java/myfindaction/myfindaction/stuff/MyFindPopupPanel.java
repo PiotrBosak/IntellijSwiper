@@ -672,8 +672,6 @@ public class MyFindPopupPanel extends JBPanel<MyFindPopupPanel> implements FindU
                 int lineOffset = usage.getDocument().getLineStartOffset(usage.getLine() - 1);
                 var verticalPosition = currentEditor.offsetToLogicalPosition(lineOffset);
                 scrollingModel.scrollTo(verticalPosition, ScrollType.CENTER);
-                currentEditor.getHighlighter().
-
 
 
             }
